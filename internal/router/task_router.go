@@ -20,4 +20,5 @@ func (t *TaskRouter) RegisterRoutes(r *mux.Router) {
 
 	userRouter := r.PathPrefix("/api/tasks").Subrouter()
 	userRouter.HandleFunc("", taskHandler.GetTasks).Methods("GET")
+	userRouter.HandleFunc("", taskHandler.CreateTask).Methods("POST")
 }
