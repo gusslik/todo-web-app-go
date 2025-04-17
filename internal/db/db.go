@@ -12,6 +12,9 @@ func OpenDBConnection(driverName string, dataSourceName string) *sql.DB {
 	if err != nil {
 		log.Fatal(err)
 	}
+	if err := db.Ping(); err != nil {
+		log.Fatal(err)
+	}
 
 	return db
 }
