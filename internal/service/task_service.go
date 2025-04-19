@@ -50,7 +50,28 @@ func (s *TaskService) CreateTask(taskName string) (*Task, error) {
 		return nil, err
 	}
 
-	fmt.Println(taskId, taskName)
+	return &Task{taskId, taskName}, nil
+}
+
+func (s *TaskService) UpdateTask(taskName string, taskId int) (*Task, error) {
+	foundTask := s.DB.QueryRow("SELECT * FROM tasks where task_id = $1", taskId)
+	if foundTask.Scan() == sql.ErrNoRows {
+		return nil, fmt.Errorf("Task with id %d doesn't exist", taskId)
+	}
+
+	_, err := s.DB.Query("UPDATE tasks SET task_name = $1 WHERE task_id = $2", taskName, taskId)
+	if err != nil {
+		return nil, err
+	}
 
 	return &Task{taskId, taskName}, nil
+}
+
+func (s *TaskService) DeleteTask(taskId int) error {
+	_, err := s.DB.Query("DELETE FROM tasks WHERE task_id = $1", taskId)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
