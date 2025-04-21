@@ -2,6 +2,9 @@ package service
 
 import (
 	"database/sql"
+	"net/http"
+	custom_error "todo-web-app-go/internal/error"
+
 	"fmt"
 )
 
@@ -42,6 +45,9 @@ func (s *TaskService) GetTasks() ([]Task, error) {
 }
 
 func (s *TaskService) CreateTask(taskName string) (*Task, error) {
+	if taskName == "" {
+		return nil, custom_error.NewApiError(http.StatusUnprocessableEntity, "request body doesn't have task name")
+	}
 	row := s.DB.QueryRow("INSERT INTO tasks(task_name) VALUES ($1) RETURNING task_id", taskName)
 
 	var taskId int
@@ -54,9 +60,14 @@ func (s *TaskService) CreateTask(taskName string) (*Task, error) {
 }
 
 func (s *TaskService) UpdateTask(taskName string, taskId int) (*Task, error) {
+
+	if taskId <= 0 {
+		return nil, custom_error.NewApiError(http.StatusUnprocessableEntity, fmt.Sprintf("wrong task id %d", taskId))
+	}
+
 	foundTask := s.DB.QueryRow("SELECT * FROM tasks where task_id = $1", taskId)
 	if foundTask.Scan() == sql.ErrNoRows {
-		return nil, fmt.Errorf("Task with id %d doesn't exist", taskId)
+		return nil, custom_error.NewApiError(http.StatusNotFound, fmt.Sprintf("task with id %d doesn't exist", taskId))
 	}
 
 	_, err := s.DB.Query("UPDATE tasks SET task_name = $1 WHERE task_id = $2", taskName, taskId)

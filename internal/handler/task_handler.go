@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"net/http"
+	custom_error "todo-web-app-go/internal/error"
 	"todo-web-app-go/internal/service"
 )
 
@@ -25,7 +26,7 @@ func (h *TaskHandler) GetTasks(w http.ResponseWriter, r *http.Request) {
 
 	tasks, err := service.GetTasks()
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		custom_error.ErrorHandler(w, err)
 		return
 	}
 
@@ -45,13 +46,13 @@ func (h *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 	var data RequestData
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
-		http.Error(w, "Error Parsing Request", http.StatusInternalServerError)
+		custom_error.ErrorHandler(w, err)
 		return
 	}
 
 	task, err := service.CreateTask(data.Task_name)
 	if err != nil {
-		http.Error(w, "Error Creating Record", http.StatusInternalServerError)
+		custom_error.ErrorHandler(w, err)
 		return
 	}
 
@@ -70,12 +71,12 @@ func (h *TaskHandler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 	var data RequestData
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		custom_error.ErrorHandler(w, err)
 		return
 	}
 	task, err := service.UpdateTask(data.Task_name, data.Task_id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		custom_error.ErrorHandler(w, err)
 		return
 	}
 
@@ -94,12 +95,12 @@ func (h *TaskHandler) DeleteTask(w http.ResponseWriter, r *http.Request) {
 	var data RequestData
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		custom_error.ErrorHandler(w, err)
 		return
 	}
 	err = service.DeleteTask(data.Task_id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		custom_error.ErrorHandler(w, err)
 		return
 	}
 
